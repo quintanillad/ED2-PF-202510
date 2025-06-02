@@ -1,4 +1,5 @@
 from mysql.connector import connect, errorcode, Error
+import os
 from os import environ
 import pandas as pd
 
