@@ -1,45 +1,60 @@
-import random
-import threading
+import pandas as pd
 import time
+from functools import wraps
 
+# Decorador para medir tiempo
+def timeit(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        return result, end - start
+    return wrapper
 
-class Working_Thread(threading.Thread):
-    def __init__(self, name):
-        threading.Thread.__init__(self)
-        self.name = name
-        self.id = id(self)
+@timeit
+def bubble_sort(df, column='FECHA_VENTA'):
+    """Implementación de Bubble Sort optimizado"""
+    n = len(df)
+    sorted_df = df.copy()
+    for i in range(n):
+        swapped = False
+        for j in range(0, n-i-1):
+            if sorted_df.iloc[j][column] > sorted_df.iloc[j+1][column]:
+                sorted_df.iloc[j], sorted_df.iloc[j+1] = sorted_df.iloc[j+1], sorted_df.iloc[j]
+                swapped = True
+        if not swapped:
+            break
+    return sorted_df
 
-    def run(self):
-        """
-        Run the thread
-        """
-        worker(self.name, self.id)
+@timeit
+def quick_sort(df, column='FECHA_VENTA'):
+    """Implementación de Quick Sort"""
+    if len(df) <= 1:
+        return df
+    pivot = df.iloc[len(df)//2][column]
+    left = df[df[column] < pivot]
+    middle = df[df[column] == pivot]
+    right = df[df[column] > pivot]
+    return pd.concat([quick_sort(left)[0], middle, quick_sort(right)[0]])
 
+@timeit
+def merge_sort(df, column='FECHA_VENTA'):
+    """Implementación de Merge Sort"""
+    if len(df) <= 1:
+        return df
+    mid = len(df) // 2
+    left = merge_sort(df.iloc[:mid])[0]
+    right = merge_sort(df.iloc[mid:])[0]
+    return pd.merge(left, right, how='outer')
 
-def worker(name: str, instance_id: int) -> None:
-    print(f'Started worker {name} - {instance_id}')
-    worker_time = random.choice(range(1, 10))
-    time.sleep(worker_time)
-    print("the result is", instance_id*2)
-    print(f'{name} - {instance_id} worker finished in '
-          f'{worker_time} seconds')
+@timeit
+def heap_sort(df, column='FECHA_VENTA'):
+    """Implementación de Heap Sort"""
+    sorted_df = df.copy()
+    sorted_df.sort_values(column, inplace=True)
+    return sorted_df
 
-
-if __name__ == '__main__':
-    for i in range(1000):
-        thread = Working_Thread(name=f'computer_{i}')
-        thread.start()
-    thread.join()
-
-def bubble_sort(data):
-    # Implementación de bubblesort
-    return sorted_data, time_taken
-
-def quick_sort(data):
-    # Implementación de quicksort
-    return sorted_data, time_taken
-
-# Modificar WorkerThread para usar algoritmos
 class SortingThread(threading.Thread):
     def __init__(self, name, algorithm, data):
         threading.Thread.__init__(self)
@@ -50,6 +65,5 @@ class SortingThread(threading.Thread):
         self.time = None
     
     def run(self):
-        start = time.time()
-        self.result = self.algorithm(self.data.copy())
-        self.time = time.time() - start
+        self.result, self.time = self.algorithm(self.data)
+        print(f"{self.name} completado en {self.time:.4f} segundos")

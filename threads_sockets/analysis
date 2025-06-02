@@ -1,50 +1,38 @@
 import pandas as pd
-import numpy as np
-from scipy import stats
 import matplotlib.pyplot as plt
+from scipy import stats
 
-def compare_results():
-    # Cargar tiempos de ejecución (ejemplo)
-    times = {
-        'bubble': 5.432,
-        'quick': 1.234,
-        'merge': 1.567,
-        'heap': 1.345
-    }
+def perform_anova(results):
+    # Preparar datos para ANOVA
+    data = []
+    for algo, res in results.items():
+        data.extend([(algo, res['time'])])
     
-    # Datos para ANOVA (simulados)
-    data = {
-        'algorithm': ['bubble']*10 + ['quick']*10 + ['merge']*10 + ['heap']*10,
-        'time': np.concatenate([
-            np.random.normal(5.4, 0.5, 10),
-            np.random.normal(1.2, 0.2, 10),
-            np.random.normal(1.5, 0.3, 10),
-            np.random.normal(1.3, 0.2, 10)
-        ])
-    }
-    
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(data, columns=['Algorithm', 'Time'])
     
     # ANOVA
-    groups = df.groupby('algorithm')['time']
-    anova_result = stats.f_oneway(
-        groups.get_group('bubble'),
-        groups.get_group('quick'),
-        groups.get_group('merge'),
-        groups.get_group('heap')
-    )
+    algorithms = df['Algorithm'].unique()
+    groups = [df[df['Algorithm'] == algo]['Time'] for algo in algorithms]
+    f_val, p_val = stats.f_oneway(*groups)
     
-    print("Resultado ANOVA:")
-    print(f"F-statistic: {anova_result.statistic:.4f}")
-    print(f"p-value: {anova_result.pvalue:.4f}")
+    print("\nAnálisis ANOVA:")
+    print(f"F-value: {f_val:.4f}")
+    print(f"P-value: {p_val:.4f}")
     
     # Visualización
-    df.boxplot(column='time', by='algorithm', figsize=(10,6))
-    plt.title('Comparación de tiempos de ordenamiento')
+    df.boxplot(column='Time', by='Algorithm', figsize=(10, 6))
+    plt.title('Comparación de Algoritmos de Ordenamiento')
     plt.suptitle('')
     plt.ylabel('Tiempo (segundos)')
     plt.savefig('sorting_comparison.png')
     plt.show()
 
 if __name__ == "__main__":
-    compare_results()
+    # Ejemplo de uso (en realidad vendría de los resultados)
+    example_results = {
+        'bubble': {'time': 5.432},
+        'quick': {'time': 1.234},
+        'merge': {'time': 1.567},
+        'heap': {'time': 1.345}
+    }
+    perform_anova(example_results)

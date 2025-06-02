@@ -59,7 +59,6 @@ def export_data(df, format_type):
     
     return file_name, file_size, export_time
 
-# Ejemplo de uso
 formats = ['CSV', 'JSON']
 for fmt in formats:
     name, size, time = export_data(df, fmt)

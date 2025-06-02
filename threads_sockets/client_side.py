@@ -1,58 +1,64 @@
 import socket
 import json
 import pandas as pd
-from sorting_algorithms import SortingThread
-
-SERVER = "192.168.1.8"
-PORT = 8080
+from threading_ed2 import SortingThread
+from sql_connection import get_connection, get_data
 
 def main():
-    # Cargar datos (ejemplo)
-    df = pd.read_csv('ventas.csv')
+    # Obtener datos de la base de datos
+    cnx = get_connection()
+    data = get_data(cnx, "SELECT * FROM UN.VENTAS LIMIT 100")  # Más datos para pruebas
+    df = pd.DataFrame(data, columns=['ID_VENTA', 'FECHA_VENTA', 'ID_CLIENTE', 'ID_EMPLEADO',
+                      'ID_PRODUCTO', 'CANTIDAD', 'PRECIO_UNITARIO', 'DESCUENTO', 'FORMA_PAGO'])
+    cnx.close()
     
-    # Crear hilos para cada algoritmo
-    algorithms = ['bubble', 'quick', 'merge', 'heap']
-    threads = []
+    # Algoritmos a probar
+    algorithms = {
+        'bubble': 'Bubble Sort',
+        'quick': 'Quick Sort', 
+        'merge': 'Merge Sort',
+        'heap': 'Heap Sort'
+    }
+    
     results = {}
     
-    for algo in algorithms:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((SERVER, PORT))
-        
-        # Preparar datos para enviar
-        request = {
-            'algorithm': algo,
-            'data': df.to_dict('records')
-        }
-        
-        # Enviar solicitud
-        client_socket.sendall(bytes(json.dumps(request), 'UTF-8'))
-        
-        # Recibir respuesta
-        response_data = client_socket.recv(16384)
-        response = json.loads(response_data.decode())
-        
-        if 'error' not in response:
-            results[algo] = {
+    for algo_key, algo_name in algorithms.items():
+        try:
+            # Configurar socket
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect(('localhost', 8080))
+            
+            # Preparar y enviar datos
+            request = {
+                'algorithm': algo_key,
+                'data': df.to_dict('records')
+            }
+            sock.sendall(json.dumps(request).encode())
+            
+            # Recibir respuesta
+            response = json.loads(sock.recv(16384).decode())
+            results[algo_key] = {
                 'time': response['time'],
                 'data': pd.DataFrame(response['sorted_data'])
             }
-            print(f"{algo} sort completado en {response['time']:.4f} segundos")
+            
+            print(f"{algo_name} completado en {response['time']:.4f} segundos")
             
             # Guardar resultados
-            pd.DataFrame(response['sorted_data']).to_csv(f'sorted_{algo}.csv', index=False)
-        else:
-            print(f"Error en {algo} sort: {response['error']}")
+            results[algo_key]['data'].to_csv(f'sorted_{algo_key}.csv', index=False)
             
-        client_socket.close()
+        except Exception as e:
+            print(f"Error con {algo_name}: {str(e)}")
+        finally:
+            sock.close()
     
     # Análisis comparativo
     if results:
-        print("\nResumen de tiempos:")
+        print("\nResumen de resultados:")
         for algo, res in results.items():
-            print(f"{algo}: {res['time']:.4f} segundos")
+            print(f"{algorithms[algo]}: {res['time']:.4f} segundos")
         
-        # agregar el análisis ANOVA
+        # Aquí iría el análisis ANOVA
         # ...
 
 if __name__ == "__main__":
