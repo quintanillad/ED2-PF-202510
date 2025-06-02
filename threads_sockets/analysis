@@ -1,0 +1,50 @@
+import pandas as pd
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+
+def compare_results():
+    # Cargar tiempos de ejecución (ejemplo)
+    times = {
+        'bubble': 5.432,
+        'quick': 1.234,
+        'merge': 1.567,
+        'heap': 1.345
+    }
+    
+    # Datos para ANOVA (simulados)
+    data = {
+        'algorithm': ['bubble']*10 + ['quick']*10 + ['merge']*10 + ['heap']*10,
+        'time': np.concatenate([
+            np.random.normal(5.4, 0.5, 10),
+            np.random.normal(1.2, 0.2, 10),
+            np.random.normal(1.5, 0.3, 10),
+            np.random.normal(1.3, 0.2, 10)
+        ])
+    }
+    
+    df = pd.DataFrame(data)
+    
+    # ANOVA
+    groups = df.groupby('algorithm')['time']
+    anova_result = stats.f_oneway(
+        groups.get_group('bubble'),
+        groups.get_group('quick'),
+        groups.get_group('merge'),
+        groups.get_group('heap')
+    )
+    
+    print("Resultado ANOVA:")
+    print(f"F-statistic: {anova_result.statistic:.4f}")
+    print(f"p-value: {anova_result.pvalue:.4f}")
+    
+    # Visualización
+    df.boxplot(column='time', by='algorithm', figsize=(10,6))
+    plt.title('Comparación de tiempos de ordenamiento')
+    plt.suptitle('')
+    plt.ylabel('Tiempo (segundos)')
+    plt.savefig('sorting_comparison.png')
+    plt.show()
+
+if __name__ == "__main__":
+    compare_results()

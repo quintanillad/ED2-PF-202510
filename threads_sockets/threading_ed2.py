@@ -30,3 +30,26 @@ if __name__ == '__main__':
         thread = Working_Thread(name=f'computer_{i}')
         thread.start()
     thread.join()
+
+def bubble_sort(data):
+    # Implementación de bubblesort
+    return sorted_data, time_taken
+
+def quick_sort(data):
+    # Implementación de quicksort
+    return sorted_data, time_taken
+
+# Modificar WorkerThread para usar algoritmos
+class SortingThread(threading.Thread):
+    def __init__(self, name, algorithm, data):
+        threading.Thread.__init__(self)
+        self.name = name
+        self.algorithm = algorithm
+        self.data = data
+        self.result = None
+        self.time = None
+    
+    def run(self):
+        start = time.time()
+        self.result = self.algorithm(self.data.copy())
+        self.time = time.time() - start

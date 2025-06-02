@@ -43,3 +43,24 @@ df = pd.DataFrame(data, columns=['ID_VENTA', 'FECHA_VENTA', 'ID_CLIENTE', 'ID_EM
                   'ID_PRODUCTO', 'CANTIDAD', 'PRECIO_UNITARIO', 'DESCUENTO', 'FORMA_PAGO'])
 
 print(df)
+
+def export_data(df, format_type):
+    file_name = f"ventas.{format_type.lower()}"
+    start_time = time.time()
+    
+    if format_type == 'CSV':
+        df.to_csv(file_name, index=False)
+    elif format_type == 'JSON':
+        df.to_json(file_name, orient='records')
+    # Añadir más formatos según necesidad
+    
+    file_size = os.path.getsize(file_name)
+    export_time = time.time() - start_time
+    
+    return file_name, file_size, export_time
+
+# Ejemplo de uso
+formats = ['CSV', 'JSON']
+for fmt in formats:
+    name, size, time = export_data(df, fmt)
+    print(f"Exportado {name} - Tamaño: {size} bytes - Tiempo: {time:.4f}s")
