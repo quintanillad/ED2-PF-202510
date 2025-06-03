@@ -1,7 +1,12 @@
 from mysql.connector import connect, errorcode, Error
 import os
 from os import environ
+from dotenv import load_dotenv 
 import pandas as pd
+import time
+
+
+load_dotenv()
 
 config = {
     "user": environ['DATABASE_USERNAME'],
@@ -46,21 +51,27 @@ df = pd.DataFrame(data, columns=['ID_VENTA', 'FECHA_VENTA', 'ID_CLIENTE', 'ID_EM
 print(df)
 
 def export_data(df, format_type):
-    file_name = f"ventas.{format_type.lower()}"
+    format_type = format_type.upper()
+    file_name = f"ventas.{format_type.lower() if format_type != 'TXT' else 'txt'}"
     start_time = time.time()
     
     if format_type == 'CSV':
         df.to_csv(file_name, index=False)
     elif format_type == 'JSON':
         df.to_json(file_name, orient='records')
-    # Añadir más formatos según necesidad
+    elif format_type == 'PARQUET':
+        df.to_parquet(file_name, engine='pyarrow')
+    elif format_type == 'TXT':
+        df.to_csv(file_name, index=False, sep='\t')
+    else:
+        raise ValueError(f"Formato no soportado: {format_type}")
     
     file_size = os.path.getsize(file_name)
     export_time = time.time() - start_time
     
     return file_name, file_size, export_time
 
-formats = ['CSV', 'JSON']
+formats = ['CSV', 'JSON','PARQUET','TXT']
 for fmt in formats:
-    name, size, time = export_data(df, fmt)
-    print(f"Exportado {name} - Tamaño: {size} bytes - Tiempo: {time:.4f}s")
+    name, size, export_duration = export_data(df, fmt)
+    print(f"Exportado {name} - Tamaño: {size} bytes - Tiempo: {export_duration:.4f}s")
