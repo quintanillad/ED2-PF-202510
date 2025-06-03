@@ -1,7 +1,7 @@
 import pandas as pd
 import time
 from functools import wraps
-
+import threading
 # Decorador para medir tiempo
 def timeit(func):
     @wraps(func)
