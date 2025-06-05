@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Benchmark Report</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            color: #333; 
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        h1 { 
+            color: #2c3e50; 
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        h2 { 
+            color: #3498db; 
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+        }
+        .plot { 
+            text-align: center; 
+            margin: 30px 0; 
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        img { 
+            max-width: 90%; 
+            border: 1px solid #ddd;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #e6f7ff;
+        }
+        .summary-card {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        .method-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-right: 5px;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Benchmark Report - Sorting Algorithms</h1>
+        <p>Generated on: {{ date }}</p>
+        
+        <div class="summary-card">
+            <h3>Resumen Ejecutivo</h3>
+            <p>Análisis comparativo de los algoritmos: 
+                {% for method in methods %}
+                <span class="method-badge">{{ method }}</span>
+                {% endfor %}
+            </p>
+            <p>Formatos evaluados: {{ formats|join(', ') }}</p>
+        </div>
+        
+        <h2>Estadísticas Básicas</h2>
+        {{ basic_stats }}
+        
+        <h2>Comparación de Rendimiento</h2>
+        <div class="plot">
+            <img src="{{ performance_plots.comparison }}" alt="Performance Comparison">
+            <p>Distribución de tiempos de ejecución por algoritmo (izq) y tiempos de exportación por formato (der)</p>
+        </div>
+        
+        <h2>Análisis Temporal</h2>
+        <div class="plot">
+            <img src="{{ performance_plots.temporal }}" alt="Temporal Analysis">
+            <p>Variación de tiempos a través de las 50 iteraciones. Valores p de Dickey-Fuller mostrados para evaluar estacionariedad.</p>
+        </div>
+        
+        <h2>Análisis de Escalabilidad</h2>
+        <div class="plot">
+            <img src="{{ performance_plots.scalability }}" alt="Scalability Analysis">
+            <p>Relación entre tamaño de archivo y tiempo de exportación para cada algoritmo.</p>
+        </div>
+        
+        <footer>
+            Reporte generado automáticamente por Sorting Benchmark Analyzer
+        </footer>
+    </div>
+</body>
+</html>
